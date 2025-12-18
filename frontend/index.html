@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界语字帖生成器</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>世界语字帖生成器</h1>
+            <p class="subtitle" id="modeIndicator">正在初始化...</p>
+        </header>
+
+        <main class="app-main">
+            <!-- 左侧设置区 -->
+            <section class="settings-panel">
+                <h2>字帖设置</h2>
+
+                <!-- 线条设置 -->
+                <div class="setting-group">
+                    <h3>线条设置</h3>
+                    <div class="form-group">
+                        <label for="lineStyle">线条样式</label>
+                        <select id="lineStyle" class="form-control">
+                            <option value="solid">直线</option>
+                            <option value="dashed">虚线</option>
+                            <option value="dotted">点线</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lineColor">线条颜色</label>
+                        <select id="lineColor" class="form-control">
+                            <option value="#cccccc">浅灰</option>
+                            <option value="#bbbbbb">中浅灰</option>
+                            <option value="#999999">中灰</option>
+                            <option value="#666666" selected>深灰</option>
+                            <option value="#333333">深黑灰</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lineSpacing">线条间距: <span id="lineSpacingValue">30</span>px</label>
+                        <input type="range" id="lineSpacing" min="15" max="40" value="30" class="form-control-range">
+                    </div>
+                </div>
+
+                <!-- 字体设置 -->
+                <div class="setting-group">
+                    <h3>字体设置</h3>
+                    <div class="form-group">
+                        <label for="fontSize">字体大小: <span id="fontSizeValue">16</span>px</label>
+                        <input type="range" id="fontSize" min="10" max="24" value="16" class="form-control-range">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fontColor">字体颜色</label>
+                        <select id="fontColor" class="form-control">
+                            <option value="#333333">深灰</option>
+                            <option value="#000000">黑色</option>
+                            <option value="#666666">中灰</option>
+                            <option value="#999999">浅灰</option>
+                            <option value="#0066cc">蓝色</option>
+                        </select>
+                    </div>
+
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <button id="generatePdf" class="btn btn-primary">
+                        <span class="icon">📄</span>
+                        导出PDF
+                    </button>
+                    <button id="resetSettings" class="btn btn-secondary">
+                        <span class="icon">🔄</span>
+                        重置设置
+                    </button>
+                </div>
+            </section>
+
+            <!-- 中间预览区 -->
+            <section class="preview-panel">
+                <h2>字帖预览</h2>
+
+                <!-- 页面导航 -->
+                <div class="page-navigation">
+                    <button id="prevPage" class="btn btn-nav" disabled>
+                        <span class="icon">◀</span>
+                        上一页
+                    </button>
+                    <span class="page-info">
+                        第 <span id="currentPage">1</span> 页 / 共 <span id="totalPages">1</span> 页
+                    </span>
+                    <button id="nextPage" class="btn btn-nav" disabled>
+                        下一页
+                        <span class="icon">▶</span>
+                    </button>
+                </div>
+
+                <!-- Canvas预览区 -->
+                <div class="canvas-container">
+                    <canvas id="previewCanvas" width="794" height="1123"></canvas>
+                </div>
+            </section>
+
+            <!-- 右侧文本输入区 -->
+            <section class="input-panel">
+                <h2>文本输入</h2>
+
+                <!-- 文本输入区 -->
+                <div class="text-input-container">
+                    <textarea
+                        id="textInput"
+                        class="form-textarea"
+                        placeholder="请输入文本内容..."
+                    ></textarea>
+
+                    <div class="text-info">
+                        <span>字符数: <span id="charCount">0</span></span>
+                        <span>预计页数: <span id="estimatedPages">0</span></span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 加载提示 -->
+        <div id="loadingOverlay" class="loading-overlay hidden">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p>正在生成PDF...</p>
+            </div>
+        </div>
+
+        <!-- 提示信息 -->
+        <div id="toast" class="toast hidden">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <!-- JavaScript模块 -->
+    <script src="js/utils.js"></script>
+    <script src="js/letter-spacing-fill.js"></script>
+    <script src="js/esperanto-text-measure.js"></script>
+    <script src="js/text-processor.js"></script>
+    <script src="js/preview-optimizer.js"></script>
+    <script src="js/canvas-pdf-generator.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/preview.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
