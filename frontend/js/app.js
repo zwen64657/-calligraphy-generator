@@ -154,8 +154,8 @@ class CalligraphyApp {
         });
 
         // 操作按钮事件
-        document.getElementById('generatePdf').addEventListener('click', () => {
-            this.generatePDF();
+        document.getElementById('exportPDF').addEventListener('click', () => {
+            this.exportPDF();
         });
 
         document.getElementById('resetSettings').addEventListener('click', () => {
@@ -195,53 +195,7 @@ class CalligraphyApp {
         document.getElementById('estimatedPages').textContent = estimatedPages;
     }
 
-    // 生成PDF
-    async generatePDF() {
-        const text = document.getElementById('textInput').value;
-
-        // 验证输入
-        const validation = Utils.validateInput(text);
-        if (!validation.valid) {
-            Utils.showToast(validation.message, 'error');
-            return;
-        }
-
-        // 显示加载状态
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        loadingOverlay.classList.remove('hidden');
-
-        try {
-            const timestamp = Utils.formatDate(new Date()).replace(/[/:]/g, '-');
-            const filename = `世界语字帖_${timestamp}.pdf`;
-
-            // 使用Canvas PDF生成器（确保字符正确显示）
-            if (!window.canvasPDFGenerator) {
-                window.canvasPDFGenerator = new window.CanvasPDFGenerator();
-            }
-
-            // 生成PDF
-            const pdfBlob = await window.canvasPDFGenerator.generatePDF(text, this.settings);
-
-            // 下载PDF
-            const url = URL.createObjectURL(pdfBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            Utils.showToast('PDF生成成功（使用Canvas渲染，确保字符正确显示）', 'success');
-        } catch (error) {
-            console.error('生成PDF失败:', error);
-            Utils.showToast('生成PDF失败：' + error.message, 'error');
-        } finally {
-            // 隐藏加载状态
-            loadingOverlay.classList.add('hidden');
-        }
-    }
-
+    
     // 重置设置
     resetSettings() {
         if (confirm('确定要重置所有设置吗？')) {
@@ -249,6 +203,56 @@ class CalligraphyApp {
             this.saveSettings();
             this.updatePreview();
             Utils.showToast('设置已重置', 'success');
+        }
+    }
+
+    // 导出PDF
+    async exportPDF() {
+        const text = document.getElementById('textInput').value;
+
+        // 检查是否有内容
+        if (!text || text.trim() === '') {
+            Utils.showToast('请先输入文本内容', 'warning');
+            return;
+        }
+
+        // 确保预览已生成
+        if (!previewRenderer.pages || previewRenderer.pages.length === 0) {
+            Utils.showToast('正在生成预览，请稍候...', 'info');
+            return;
+        }
+
+        try {
+            // 显示进度提示
+            Utils.showToast('正在生成PDF...', 'info');
+
+            // 生成PDF
+            const pdfData = await pdfGenerator.generatePDF(
+                text,
+                this.settings,
+                previewRenderer,
+                {
+                    quality: 0.8,
+                    dpi: 150,
+                    pageRange: 'all',
+                    filename: '字帖.pdf',
+                    progressCallback: (current, total) => {
+                        const progress = Math.round((current / total) * 100);
+                        Utils.showToast(`正在生成PDF... ${progress}%`, 'info');
+                    }
+                }
+            );
+
+            // 下载PDF
+            await pdfGenerator.downloadPDF(pdfData, pdfData.filename);
+
+            // 获取文件大小
+            const fileSize = pdfGenerator.getPDFSize(pdfData);
+            Utils.showToast(`PDF已生成 (${fileSize} KB)`, 'success');
+
+        } catch (error) {
+            console.error('PDF生成失败:', error);
+            Utils.showToast('PDF生成失败: ' + error.message, 'error');
         }
     }
 

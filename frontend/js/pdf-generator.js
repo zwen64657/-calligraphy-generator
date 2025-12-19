@@ -1,162 +1,157 @@
-// 纯前端PDF生成器
+// PDF生成器模块
 class PDFGenerator {
     constructor() {
-        this.jsPDF = null;
-        this.fontsLoaded = false;
-        this.loadJsPDF();
+        this.jsPDF = window.jspdf.jsPDF;
+        this.quality = 0.8; // JPEG压缩质量
+        this.dpi = 150; // 打印用DPI
     }
 
-    // 加载jsPDF库
-    loadJsPDF() {
-        // 创建script标签加载jsPDF
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        script.onload = () => {
-            this.jsPDF = window.jspdf.jsPDF;
-            this.loadFonts();
-            console.log('jsPDF已加载');
+    // 生成PDF文档
+    async generatePDF(text, settings, previewRenderer, options = {}) {
+        // 合并默认选项
+        const opts = {
+            quality: options.quality || this.quality,
+            dpi: options.dpi || this.dpi,
+            pageRange: options.pageRange || 'all', // 'all', 'current', 或 {start, end}
+            filename: options.filename || '字帖.pdf',
+            progressCallback: options.progressCallback || null
         };
-        script.onerror = () => {
-            console.error('jsPDF加载失败');
-        };
-        document.head.appendChild(script);
-    }
 
-    // 加载支持世界语的字体
-    async loadFonts() {
-        // 尝试加载Noto Sans字体，支持世界语字符
-        try {
-            // 从CDN加载Noto Sans字体文件
-            const fontResponse = await fetch('https://cdn.jsdelivr.net/npm/@fontsource/noto-sans@4.5.11/files/noto-sans-latin-400-normal.woff');
-            if (fontResponse.ok) {
-                const fontBytes = await fontResponse.arrayBuffer();
-                const base64Font = btoa(String.fromCharCode(...new Uint8Array(fontBytes)));
-
-                // 添加字体到jsPDF
-                this.jsPDF.addFileToVFS('NotoSans-normal.ttf', base64Font);
-                this.jsPDF.addFont('NotoSans-normal.ttf', 'NotoSans', 'normal');
-                this.fontsLoaded = true;
-                console.log('Noto Sans字体已加载');
-            }
-        } catch (error) {
-            console.log('无法加载Noto Sans字体，使用默认字体');
-        }
-    }
-
-    // 生成PDF
-    async generatePDF(text, settings) {
+        // 检查jsPDF是否已加载
         if (!this.jsPDF) {
-            throw new Error('jsPDF未加载完成');
+            throw new Error('jsPDF库未加载');
         }
 
-        // 等待字体加载完成（最多等待3秒）
-        let attempts = 0;
-        while (!this.fontsLoaded && attempts < 30) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-            attempts++;
-        }
-
-        // 创建PDF实例
+        // 创建PDF文档
         const pdf = new this.jsPDF({
             orientation: 'portrait',
-            unit: 'pt',
+            unit: 'mm',
             format: 'a4'
         });
 
-        // 页面设置
-        const pageWidth = pdf.internal.pageSize.getWidth();  // 595.28 pt (A4)
-        const pageHeight = pdf.internal.pageSize.getHeight(); // 841.89 pt (A4)
-        const margin = 50;
-        const contentWidth = pageWidth - margin * 2;
-        const lineHeight = settings.lineSpacing || 30;
+        // A4尺寸（毫米）
+        const pageWidth = 210;
+        const pageHeight = 297;
 
-        // 使用世界语文本测量器
-        const measure = new window.EsperantoTextMeasure();
-        measure.ctx.font = `${settings.fontSize}px Arial`;
+        // 获取页面数据
+        const pages = this.getPagesToGenerate(previewRenderer, opts.pageRange);
 
-        // 处理文本
-        const lines = measure.wrapText(text, {
-            fontSize: settings.fontSize,
-            lineWidth: contentWidth,
-            lineHeight: lineHeight
-        });
+        if (pages.length === 0) {
+            throw new Error('没有页面可以导出');
+        }
 
-        // 分页
-        const pages = measure.paginateText(lines, lineHeight, pageHeight);
+        // 生成每一页
+        for (let i = 0; i < pages.length; i++) {
+            const pageIndex = pages[i];
 
-        // 绘制每一页
-        pages.forEach((pageLines, pageIndex) => {
-            if (pageIndex > 0) {
+            // 更新进度
+            if (opts.progressCallback) {
+                opts.progressCallback(i + 1, pages.length);
+            }
+
+            // 如果不是第一页，添加新页
+            if (i > 0) {
                 pdf.addPage();
             }
 
-            // 绘制横线
-            pdf.setDrawColor(settings.lineColor);
-            pdf.setLineWidth(0.5);
+            // 渲染页面到高DPI Canvas
+            const canvasData = await this.renderHighDPICanvas(pageIndex, text, settings, previewRenderer);
 
-            const linesPerPage = Math.floor((pageHeight - margin * 2) / lineHeight);
-            for (let i = 0; i < linesPerPage; i++) {
-                const y = margin + i * lineHeight;
-                pdf.line(margin, y, pageWidth - margin, y);
-            }
-
-            // 绘制文本
-            pdf.setFontSize(settings.fontSize);
-            pdf.setTextColor(settings.fontColor);
-
-            // 尝试使用Noto Sans，如果没有则使用默认字体
-            if (this.fontsLoaded) {
-                pdf.setFont('NotoSans', 'normal');
-            } else {
-                pdf.setFont('helvetica');
-            }
-
-            // 处理每行文本
-            pageLines.forEach((line, lineIndex) => {
-                if (line.trim()) {
-                    const y = margin + lineIndex * lineHeight + settings.fontSize;
-
-                    // 如果没有加载特殊字体，尝试使用Unicode替代方案
-                    if (!this.fontsLoaded) {
-                        // 转换世界语特殊字符为可显示的替代字符
-                        const displayLine = this.convertEsperantoChars(line);
-                        pdf.text(displayLine, margin, y);
-                    } else {
-                        // 使用Noto Sans字体直接显示
-                        pdf.text(line, margin, y);
-                    }
-                }
-            });
-
-            // 绘制页码
-            pdf.setFontSize(10);
-            pdf.setTextColor('#666666');
-            pdf.text(
-                `${pageIndex + 1} / ${pages.length}`,
-                pageWidth / 2,
-                pageHeight - 20,
-                { align: 'center' }
+            // 添加到PDF
+            pdf.addImage(
+                canvasData,
+                'JPEG',
+                0,
+                0,
+                pageWidth,
+                pageHeight,
+                undefined,
+                'FAST'
             );
-        });
+        }
 
-        // 返回PDF的blob
-        return pdf.output('blob');
+        return { pdf, filename: opts.filename };
     }
 
-    // 转换世界语字符为ASCII替代字符（备用方案）
-    convertEsperantoChars(text) {
-        const charMap = {
-            'ĉ': 'cx', 'Ĉ': 'CX',
-            'ĝ': 'gx', 'Ĝ': 'GX',
-            'ĥ': 'hx', 'Ĥ': 'HX',
-            'ĵ': 'jx', 'Ĵ': 'JX',
-            'ŝ': 'sx', 'Ŝ': 'SX',
-            'ŭ': 'ux', 'Ŭ': 'UX'
-        };
+    // 获取需要生成的页面
+    getPagesToGenerate(previewRenderer, pageRange) {
+        const totalPages = previewRenderer.pages.length || 1;
 
-        return text.replace(/[ĉĝĥĵŝŭĈĜĤĴŜŬ]/g, (match) => charMap[match] || match);
+        if (pageRange === 'all') {
+            return Array.from({ length: totalPages }, (_, i) => i);
+        } else if (pageRange === 'current') {
+            return [previewRenderer.currentPage || 0];
+        } else if (typeof pageRange === 'object' && pageRange.start !== undefined) {
+            const start = Math.max(0, pageRange.start);
+            const end = Math.min(totalPages - 1, pageRange.end || totalPages - 1);
+            return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+        }
+
+        return [0]; // 默认第一页
+    }
+
+    // 渲染高DPI Canvas
+    async renderHighDPICanvas(pageIndex, text, settings, previewRenderer) {
+        return new Promise((resolve) => {
+            // 创建临时Canvas用于高DPI渲染
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+
+            // 设置高DPI尺寸（2倍）
+            const scale = 2;
+            tempCanvas.width = previewRenderer.width * scale;
+            tempCanvas.height = previewRenderer.height * scale;
+
+            // 缩放上下文
+            tempCtx.scale(scale, scale);
+
+            // 保存原始Canvas状态
+            const originalCanvas = previewRenderer.canvas;
+            const originalCtx = previewRenderer.ctx;
+
+            // 临时切换到高DPI Canvas
+            previewRenderer.canvas = tempCanvas;
+            previewRenderer.ctx = tempCtx;
+
+            // 渲染页面
+            previewRenderer.renderPage(pageIndex, text, settings);
+
+            // 获取高质量图片数据
+            const dataURL = tempCanvas.toDataURL('image/jpeg', this.quality);
+
+            // 恢复原始Canvas
+            previewRenderer.canvas = originalCanvas;
+            previewRenderer.ctx = originalCtx;
+
+            // 重新渲染当前页面以恢复预览
+            previewRenderer.renderPage(previewRenderer.currentPage, text, settings);
+
+            resolve(dataURL);
+        });
+    }
+
+    // 下载PDF
+    async downloadPDF(pdfData, filename) {
+        const blob = pdfData.pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        // 清理URL对象
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    }
+
+    // 获取文件大小（KB）
+    getPDFSize(pdfData) {
+        const blob = pdfData.pdf.output('blob');
+        return (blob.size / 1024).toFixed(2);
     }
 }
 
-// 导出类
-window.PDFGenerator = PDFGenerator;
+// 创建全局PDF生成器实例
+window.pdfGenerator = new PDFGenerator();
