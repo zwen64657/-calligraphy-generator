@@ -263,21 +263,11 @@ class Utils {
     static resetSettings() {
         const defaults = {
             lineStyle: 'solid',
-            lineColor: '#666666',
-            lineSpacing: 30,
-            fontSize: 16,
+            lineColor: '#1a1a1a',
+            lineSpacing: 35,
+            fontSize: 20,
             fontColor: '#333333'
         };
-
-        document.getElementById('lineStyle').value = defaults.lineStyle;
-        document.getElementById('lineColor').value = defaults.lineColor;
-        document.getElementById('lineSpacing').value = defaults.lineSpacing;
-        document.getElementById('fontSize').value = defaults.fontSize;
-        document.getElementById('fontColor').value = defaults.fontColor;
-
-        // 更新显示值
-        document.getElementById('lineSpacingValue').textContent = defaults.lineSpacing;
-        document.getElementById('fontSizeValue').textContent = defaults.fontSize;
 
         return defaults;
     }

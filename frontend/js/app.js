@@ -3,9 +3,9 @@ class CalligraphyApp {
     constructor() {
         this.settings = {
             lineStyle: 'solid',
-            lineColor: '#666666',
-            lineSpacing: 30,
-            fontSize: 16,
+            lineColor: '#1a1a1a',
+            lineSpacing: 35,
+            fontSize: 20,
             fontColor: '#333333'
         };
 
@@ -26,9 +26,7 @@ class CalligraphyApp {
         // 初始化预览
         this.initPreview();
 
-        // 设置模式指示器
-        document.getElementById('modeIndicator').textContent = '世界语字帖生成器';
-        Utils.showToast('世界语字帖生成器已就绪', 'success');
+        Utils.showToast('字帖生成器已就绪', 'success');
     }
 
     // 初始化世界语文本测量模块
@@ -85,11 +83,32 @@ class CalligraphyApp {
 
     // 应用设置到表单
     applySettingsToForm() {
-        document.getElementById('lineStyle').value = this.settings.lineStyle;
-        document.getElementById('lineColor').value = this.settings.lineColor;
         document.getElementById('lineSpacing').value = this.settings.lineSpacing;
         document.getElementById('fontSize').value = this.settings.fontSize;
-        document.getElementById('fontColor').value = this.settings.fontColor;
+
+        // 设置线条样式
+        document.querySelectorAll('#lineStyleSelector .style-option').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.dataset.style === this.settings.lineStyle) {
+                btn.classList.add('selected');
+            }
+        });
+
+        // 设置线条颜色
+        document.querySelectorAll('#lineColorSelector .color-circle').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.dataset.color === this.settings.lineColor) {
+                btn.classList.add('selected');
+            }
+        });
+
+        // 设置字体颜色
+        document.querySelectorAll('#fontColorSelector .color-circle').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.dataset.color === this.settings.fontColor) {
+                btn.classList.add('selected');
+            }
+        });
 
         // 更新显示值
         document.getElementById('lineSpacingValue').textContent = this.settings.lineSpacing;
@@ -99,16 +118,32 @@ class CalligraphyApp {
     // 绑定事件监听器
     bindEventListeners() {
         // 设置相关事件
-        document.getElementById('lineStyle').addEventListener('change', (e) => {
-            this.settings.lineStyle = e.target.value;
-            this.updatePreview();
-            this.saveSettings();
+        // 线条样式选择器
+        document.querySelectorAll('#lineStyleSelector .style-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有选中状态
+                document.querySelectorAll('#lineStyleSelector .style-option').forEach(b => b.classList.remove('selected'));
+                // 添加选中状态
+                btn.classList.add('selected');
+                // 更新设置
+                this.settings.lineStyle = btn.dataset.style;
+                this.updatePreview();
+                this.saveSettings();
+            });
         });
 
-        document.getElementById('lineColor').addEventListener('change', (e) => {
-            this.settings.lineColor = e.target.value;
-            this.updatePreview();
-            this.saveSettings();
+        // 线条颜色选择器
+        document.querySelectorAll('#lineColorSelector .color-circle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有选中状态
+                document.querySelectorAll('#lineColorSelector .color-circle').forEach(b => b.classList.remove('selected'));
+                // 添加选中状态
+                btn.classList.add('selected');
+                // 更新设置
+                this.settings.lineColor = btn.dataset.color;
+                this.updatePreview();
+                this.saveSettings();
+            });
         });
 
         document.getElementById('lineSpacing').addEventListener('input', (e) => {
@@ -125,10 +160,18 @@ class CalligraphyApp {
             this.saveSettings();
         });
 
-        document.getElementById('fontColor').addEventListener('change', (e) => {
-            this.settings.fontColor = e.target.value;
-            this.updatePreview();
-            this.saveSettings();
+        // 字体颜色选择器
+        document.querySelectorAll('#fontColorSelector .color-circle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // 移除所有选中状态
+                document.querySelectorAll('#fontColorSelector .color-circle').forEach(b => b.classList.remove('selected'));
+                // 添加选中状态
+                btn.classList.add('selected');
+                // 更新设置
+                this.settings.fontColor = btn.dataset.color;
+                this.updatePreview();
+                this.saveSettings();
+            });
         });
 
         
@@ -200,6 +243,7 @@ class CalligraphyApp {
     resetSettings() {
         if (confirm('确定要重置所有设置吗？')) {
             this.settings = Utils.resetSettings();
+            this.applySettingsToForm(); // 应用设置到UI
             this.saveSettings();
             this.updatePreview();
             Utils.showToast('设置已重置', 'success');

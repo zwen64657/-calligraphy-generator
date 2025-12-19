@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>世界语字帖生成器</title>
+    <title></title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
 </head>
@@ -11,7 +11,6 @@
     <div class="app-container">
         <header class="app-header">
             <h1>世界语字帖生成器</h1>
-            <p class="subtitle" id="modeIndicator">正在初始化...</p>
         </header>
 
         <main class="app-main">
@@ -23,28 +22,37 @@
                 <div class="setting-group">
                     <h3>线条设置</h3>
                     <div class="form-group">
-                        <label for="lineStyle">线条样式</label>
-                        <select id="lineStyle" class="form-control">
-                            <option value="solid">直线</option>
-                            <option value="dashed">虚线</option>
-                            <option value="dotted">点线</option>
-                        </select>
+                        <label>线条样式</label>
+                        <div class="style-selector" id="lineStyleSelector">
+                            <button type="button" class="style-option selected" data-style="solid">
+                                <div class="line-preview solid-line"></div>
+                                <span>直线</span>
+                            </button>
+                            <button type="button" class="style-option" data-style="dashed">
+                                <div class="line-preview dashed-line"></div>
+                                <span>虚线</span>
+                            </button>
+                            <button type="button" class="style-option" data-style="dotted">
+                                <div class="line-preview dotted-line"></div>
+                                <span>点线</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="lineColor">线条颜色</label>
-                        <select id="lineColor" class="form-control">
-                            <option value="#cccccc">浅灰</option>
-                            <option value="#bbbbbb">中浅灰</option>
-                            <option value="#999999">中灰</option>
-                            <option value="#666666" selected>深灰</option>
-                            <option value="#333333">深黑灰</option>
-                        </select>
+                        <label>线条颜色</label>
+                        <div class="color-selector" id="lineColorSelector">
+                            <button type="button" class="color-circle selected" data-color="#1a1a1a" style="background-color: #1a1a1a"></button>
+                            <button type="button" class="color-circle" data-color="#333333" style="background-color: #333333"></button>
+                            <button type="button" class="color-circle" data-color="#4d4d4d" style="background-color: #4d4d4d"></button>
+                            <button type="button" class="color-circle" data-color="#666666" style="background-color: #666666"></button>
+                            <button type="button" class="color-circle" data-color="#808080" style="background-color: #808080"></button>
+                        </div>
                     </div>
 
                     <div class="form-group">
-                        <label for="lineSpacing">线条间距: <span id="lineSpacingValue">30</span>px</label>
-                        <input type="range" id="lineSpacing" min="15" max="40" value="30" class="form-control-range">
+                        <label for="lineSpacing">线条间距: <span id="lineSpacingValue">35</span>px</label>
+                        <input type="range" id="lineSpacing" min="20" max="50" value="35" class="form-control-range">
                     </div>
                 </div>
 
@@ -52,19 +60,19 @@
                 <div class="setting-group">
                     <h3>字体设置</h3>
                     <div class="form-group">
-                        <label for="fontSize">字体大小: <span id="fontSizeValue">16</span>px</label>
-                        <input type="range" id="fontSize" min="10" max="24" value="16" class="form-control-range">
+                        <label for="fontSize">字体大小: <span id="fontSizeValue">20</span>px</label>
+                        <input type="range" id="fontSize" min="20" max="40" value="20" class="form-control-range">
                     </div>
 
                     <div class="form-group">
-                        <label for="fontColor">字体颜色</label>
-                        <select id="fontColor" class="form-control">
-                            <option value="#333333">深灰</option>
-                            <option value="#000000">黑色</option>
-                            <option value="#666666">中灰</option>
-                            <option value="#999999">浅灰</option>
-                            <option value="#0066cc">蓝色</option>
-                        </select>
+                        <label>字体颜色</label>
+                        <div class="color-selector" id="fontColorSelector">
+                            <button type="button" class="color-circle selected" data-color="#333333" style="background-color: #333333"></button>
+                            <button type="button" class="color-circle" data-color="#000000" style="background-color: #000000"></button>
+                            <button type="button" class="color-circle" data-color="#666666" style="background-color: #666666"></button>
+                            <button type="button" class="color-circle" data-color="#999999" style="background-color: #999999"></button>
+                            <button type="button" class="color-circle" data-color="#0066cc" style="background-color: #0066cc"></button>
+                        </div>
                     </div>
 
                 <!-- 操作按钮 -->

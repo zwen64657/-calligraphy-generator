@@ -82,7 +82,7 @@ class PreviewRenderer {
     // 绘制文本
     drawText(lines, settings, pageIndex = 0) {
         // 设置字体
-        this.ctx.font = `${settings.fontSize}px Arial, "Arial Unicode MS", "Noto Sans", "Microsoft YaHei"`;
+        this.ctx.font = `italic ${settings.fontSize}px Calibri`;
         this.ctx.fillStyle = settings.fontColor;
 
         const startY = this.marginTop;
@@ -125,7 +125,7 @@ class PreviewRenderer {
                     const currentLetterSpacing = this.ctx.letterSpacing || '0px';
 
                     // 确保字体设置正确
-                    this.ctx.font = `${settings.fontSize}px Arial, "Arial Unicode MS", "Noto Sans", "Microsoft YaHei"`;
+                    this.ctx.font = `italic ${settings.fontSize}px Calibri`;
                     this.ctx.fillStyle = settings.fontColor;
 
                     // 尝试设置字母间距
@@ -403,7 +403,7 @@ class PreviewRenderer {
     // 文本自动换行到指定宽度（改进版）
     wrapTextToWidth(text, maxWidth, fontSize) {
         // 设置字体以确保准确测量
-        this.ctx.font = `${fontSize}px Arial, "Arial Unicode MS", "Noto Sans", "Microsoft YaHei"`;
+        this.ctx.font = `italic ${fontSize}px Calibri`;
 
         const lines = [];
         const paragraphs = text.split('\n');
@@ -461,7 +461,7 @@ class PreviewRenderer {
         let currentPart = '';
 
         // 确保字体设置正确
-        this.ctx.font = `${fontSize}px Arial, "Arial Unicode MS", "Noto Sans", "Microsoft YaHei"`;
+        this.ctx.font = `italic ${fontSize}px Calibri`;
 
         for (const char of word) {
             const testPart = currentPart + char;
@@ -495,7 +495,7 @@ class PreviewRenderer {
         this.drawLines(settings);
 
         // 设置字体
-        this.ctx.font = `${settings.fontSize}px Arial, "Arial Unicode MS", "Noto Sans", "Microsoft YaHei"`;
+        this.ctx.font = `italic ${settings.fontSize}px Calibri`;
         this.ctx.fillStyle = settings.fontColor;
 
         // 横向模式渲染
