@@ -9,6 +9,40 @@
 </head>
 <body>
     <div class="app-container">
+        <!-- 模态弹窗 -->
+        <div class="intro-modal" id="introModal">
+            <div class="intro-modal-overlay" id="modalOverlay"></div>
+            <div class="intro-modal-content">
+                <button class="intro-modal-close" id="closeModalBtn" aria-label="关闭">
+                    <span>✕</span>
+                </button>
+                <div class="intro-modal-header">
+                    <div class="intro-modal-icon">📝</div>
+                    <h2>欢迎使用世界语字帖生成器</h2>
+                    <div class="intro-badge-highlight">
+                        <span class="badge-icon">✨</span>
+                        AI驱动：智谱GLM
+                    </div>
+                </div>
+                <div class="intro-modal-body">
+                    <p class="intro-description">
+                        输入您想要练习的世界语文本，即可生成专业的可打印字帖PDF。
+                    </p>
+                    <ul class="intro-features">
+                        <li><span class="feature-icon">✓</span> 自由设置线条样式和颜色</li>
+                        <li><span class="feature-icon">✓</span> 调整字体大小和间距</li>
+                        <li><span class="feature-icon">✓</span> 实时预览效果</li>
+                        <li><span class="feature-icon">✓</span> 一键导出高清PDF</li>
+                    </ul>
+                </div>
+                <div class="intro-modal-footer">
+                    <button class="intro-modal-btn" id="gotItBtn">
+                        我知道了
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <header class="app-header">
             <h1>世界语字帖生成器</h1>
         </header>
@@ -35,6 +69,10 @@
                             <button type="button" class="style-option" data-style="dotted">
                                 <div class="line-preview dotted-line"></div>
                                 <span>点线</span>
+                            </button>
+                            <button type="button" class="style-option" data-style="dashdot">
+                                <div class="line-preview dashdot-line"></div>
+                                <span>点划线</span>
                             </button>
                         </div>
                     </div>
@@ -72,6 +110,13 @@
                             <button type="button" class="color-circle" data-color="#666666" style="background-color: #666666"></button>
                             <button type="button" class="color-circle" data-color="#999999" style="background-color: #999999"></button>
                             <button type="button" class="color-circle" data-color="#0066cc" style="background-color: #0066cc"></button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>字体</label>
+                        <div class="font-selector" id="fontFamilySelector">
+                            <button type="button" class="font-circle selected" data-font="衡水体" style="font-family: 衡水体, Calibri, sans-serif">衡水体</button>
                         </div>
                     </div>
 

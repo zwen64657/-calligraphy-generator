@@ -6,7 +6,8 @@ class CalligraphyApp {
             lineColor: '#1a1a1a',
             lineSpacing: 35,
             fontSize: 20,
-            fontColor: '#333333'
+            fontColor: '#333333',
+            fontFamily: '衡水体'
         };
         this.init();
     }
@@ -14,6 +15,22 @@ class CalligraphyApp {
     init() {
         this.bindEventListeners();
         this.initPreview();
+        this.initIntroBanner();
+    }
+
+    initIntroBanner() {
+        const modal = document.getElementById('introModal');
+        const closeBtn = document.getElementById('closeModalBtn');
+        const gotItBtn = document.getElementById('gotItBtn');
+        const overlay = document.getElementById('modalOverlay');
+
+        const closeModal = () => {
+            modal.classList.add('hidden');
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        gotItBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', closeModal);
     }
 
     bindEventListeners() {
@@ -57,6 +74,16 @@ class CalligraphyApp {
                 document.querySelectorAll('#fontColorSelector .color-circle').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
                 this.settings.fontColor = btn.dataset.color;
+                this.updatePreview();
+            });
+        });
+
+        // 字体选择器
+        document.querySelectorAll('#fontFamilySelector .font-circle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#fontFamilySelector .font-circle').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                this.settings.fontFamily = btn.dataset.font;
                 this.updatePreview();
             });
         });
@@ -113,7 +140,8 @@ class CalligraphyApp {
                 lineColor: '#1a1a1a',
                 lineSpacing: 35,
                 fontSize: 20,
-                fontColor: '#333333'
+                fontColor: '#333333',
+                fontFamily: '衡水体'
             };
             this.applySettingsToForm();
             this.updatePreview();
@@ -142,6 +170,13 @@ class CalligraphyApp {
         document.querySelectorAll('#fontColorSelector .color-circle').forEach(btn => {
             btn.classList.remove('selected');
             if (btn.dataset.color === this.settings.fontColor) {
+                btn.classList.add('selected');
+            }
+        });
+
+        document.querySelectorAll('#fontFamilySelector .font-circle').forEach(btn => {
+            btn.classList.remove('selected');
+            if (btn.dataset.font === this.settings.fontFamily) {
                 btn.classList.add('selected');
             }
         });
@@ -229,6 +264,10 @@ class PreviewRenderer {
     drawLines(settings) {
         this.ctx.strokeStyle = settings.lineColor;
         this.ctx.lineWidth = 1;
+
+        const startY = this.marginTop;
+        const linesPerPage = Math.floor(this.contentHeight / settings.lineSpacing);
+
         switch (settings.lineStyle) {
             case 'dashed':
                 this.ctx.setLineDash([5, 5]);
@@ -236,11 +275,14 @@ class PreviewRenderer {
             case 'dotted':
                 this.ctx.setLineDash([2, 3]);
                 break;
+            case 'dashdot':
+                // 点划线：长划-短点交替
+                this.ctx.setLineDash([10, 5, 2, 5]);
+                break;
             default:
                 this.ctx.setLineDash([]);
         }
-        const startY = this.marginTop;
-        const linesPerPage = Math.floor(this.contentHeight / settings.lineSpacing);
+
         for (let i = 0; i < linesPerPage; i++) {
             const y = startY + (i * settings.lineSpacing);
             this.ctx.beginPath();
@@ -252,7 +294,7 @@ class PreviewRenderer {
     }
 
     drawText(lines, settings, pageIndex = 0) {
-        this.ctx.font = `italic ${settings.fontSize}px Calibri`;
+        this.ctx.font = `italic ${settings.fontSize}px ${settings.fontFamily}`;
         this.ctx.fillStyle = settings.fontColor;
         const startY = this.marginTop;
         this.drawHorizontalText(lines, settings, startY);
@@ -305,7 +347,7 @@ class PreviewRenderer {
             totalPages = this.pages.length;
         } else {
             // 使用相同的换行逻辑
-            const wrappedLines = this.wrapTextToWidth(text, this.contentWidth, settings.fontSize);
+            const wrappedLines = this.wrapTextToWidth(text, this.contentWidth, settings.fontSize, settings.fontFamily);
             const linesPerPage = Math.floor(this.contentHeight / settings.lineSpacing);
             const startIndex = pageIndex * linesPerPage;
             pageLines = wrappedLines.slice(startIndex, startIndex + linesPerPage);
@@ -321,7 +363,7 @@ class PreviewRenderer {
 
     splitTextIntoLines(text, maxCharsPerLine) {
         // 此函数不再使用，改用 wrapTextToWidth
-        return this.wrapTextToWidth(text, this.contentWidth, 20);
+        return this.wrapTextToWidth(text, this.contentWidth, 20, '衡水体');
     }
 
     updatePreview(text, settings) {
@@ -349,7 +391,7 @@ class PreviewRenderer {
         try {
             this.clear();
             this.drawLines(settings);
-            this.ctx.font = `italic ${settings.fontSize}px Calibri`;
+            this.ctx.font = `italic ${settings.fontSize}px ${settings.fontFamily}`;
             this.ctx.fillStyle = settings.fontColor;
             this.renderHorizontalText(text, settings);
         } catch (error) {
@@ -359,7 +401,7 @@ class PreviewRenderer {
 
     renderHorizontalText(text, settings) {
         const availableWidth = this.contentWidth; // 使用contentWidth而不是计算
-        const wrappedLines = this.wrapTextToWidth(text, availableWidth, settings.fontSize);
+        const wrappedLines = this.wrapTextToWidth(text, availableWidth, settings.fontSize, settings.fontFamily);
         const linesPerPage = Math.floor(this.contentHeight / settings.lineSpacing);
         const pages = [];
         for (let i = 0; i < wrappedLines.length; i += linesPerPage) {
@@ -383,9 +425,9 @@ class PreviewRenderer {
         this.updatePageNavigation();
     }
 
-    wrapTextToWidth(text, maxWidth, fontSize) {
+    wrapTextToWidth(text, maxWidth, fontSize, fontFamily = '衡水体') {
         // 设置字体确保测量准确
-        this.ctx.font = `italic ${fontSize}px Calibri`;
+        this.ctx.font = `italic ${fontSize}px ${fontFamily}`;
         const lines = [];
         const paragraphs = text.split('\n');
 
@@ -480,7 +522,7 @@ class PreviewRenderer {
     fallbackSimpleTextRender(text, settings) {
         this.clear();
         this.drawLines(settings);
-        this.ctx.font = `italic ${settings.fontSize}px Calibri`;
+        this.ctx.font = `italic ${settings.fontSize}px ${settings.fontFamily}`;
         this.ctx.fillStyle = settings.fontColor;
         this.ctx.textBaseline = 'bottom';
         const lines = text.split('\n');

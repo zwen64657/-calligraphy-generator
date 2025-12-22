@@ -153,6 +153,16 @@ select.form-control {
     border-bottom: 2px dotted #666;
 }
 
+.dashdot-line {
+    border-bottom: 2px solid #666;
+    background-image: linear-gradient(to right, #666 8px, transparent 4px, #666 2px, transparent 4px);
+    background-repeat: repeat-x;
+    background-position: left bottom;
+    background-size: 18px 2px;
+    border-bottom: none;
+    padding-bottom: 2px;
+}
+
 select.custom-select {
     background-size: 16px;
     padding-right: 36px;
@@ -291,5 +301,57 @@ select.custom-select {
     width: 16px;
     height: 16px;
     cursor: pointer;
+}
+
+/* 字体选择器样式 */
+.font-selector {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.font-circle {
+    min-width: 80px;
+    height: 40px;
+    border-radius: 20px;
+    border: 2px solid #ddd;
+    background-color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #333;
+    padding: 0 15px;
+}
+
+.font-circle:hover {
+    transform: scale(1.05);
+    border-color: #999;
+}
+
+.font-circle.selected {
+    border-color: #0066cc;
+    border-width: 3px;
+    background-color: #f0f7ff;
+}
+
+.font-circle.selected::after {
+    content: '✓';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 14px;
+    height: 14px;
+    background-color: #0066cc;
+    color: white;
+    border-radius: 50%;
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid white;
 }
 
