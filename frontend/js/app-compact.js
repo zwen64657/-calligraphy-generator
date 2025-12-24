@@ -7,7 +7,8 @@ class CalligraphyApp {
             lineSpacing: 35,
             fontSize: 20,
             fontColor: '#333333',
-            fontFamily: '衡水体'
+            fontFamily: 'Calibri',
+            autoLineSpacing: true
         };
         this.init();
     }
@@ -61,11 +62,25 @@ class CalligraphyApp {
             this.updatePreview();
         });
 
+        // 自动调整行间距
+        document.getElementById('autoLineSpacing').addEventListener('change', (e) => {
+            this.settings.autoLineSpacing = e.target.checked;
+            if (this.settings.autoLineSpacing) {
+                this.updateLineSpacingFromFontSize();
+            }
+            this.updateLineSpacingControlState();
+            this.updatePreview();
+        });
+
         // 字体大小
         document.getElementById('fontSize').addEventListener('input', (e) => {
             this.settings.fontSize = parseInt(e.target.value);
             document.getElementById('fontSizeValue').textContent = this.settings.fontSize;
+            if (this.settings.autoLineSpacing) {
+                this.updateLineSpacingFromFontSize();
+            }
             this.updatePreview();
+            this.updateTextInfo();
         });
 
         // 字体颜色选择器
@@ -118,6 +133,7 @@ class CalligraphyApp {
 
     initPreview() {
         previewRenderer.fitToContainer();
+        this.updateLineSpacingControlState();
         this.updatePreview();
     }
 
@@ -126,10 +142,35 @@ class CalligraphyApp {
         previewRenderer.updatePreview(text, this.settings);
     }
 
+    updateLineSpacingFromFontSize() {
+        const ratio = 1.75;
+        const calculatedSpacing = Math.round(this.settings.fontSize * ratio);
+        const clampedSpacing = Math.max(20, Math.min(50, calculatedSpacing));
+        this.settings.lineSpacing = clampedSpacing;
+        document.getElementById('lineSpacing').value = clampedSpacing;
+        document.getElementById('lineSpacingValue').textContent = clampedSpacing;
+        this.updatePreview();
+    }
+
+    updateLineSpacingControlState() {
+        const slider = document.getElementById('lineSpacing');
+        const checkbox = document.getElementById('autoLineSpacing');
+        slider.disabled = checkbox.checked;
+        slider.style.opacity = checkbox.checked ? '0.5' : '1';
+    }
+
     updateTextInfo() {
-        const text = document.getElementById('textInput').value;
+        let text = document.getElementById('textInput').value;
+        // 使用cleanText清洗文本，与实际渲染保持一致
+        const cleanedText = previewRenderer.cleanText(text);
+
+        // 显示原始文本的字符数
         document.getElementById('charCount').textContent = text.length;
-        const estimatedPages = Math.ceil(text.length / 500);
+
+        // 使用清洗后的文本计算预计页数
+        const wrappedLines = previewRenderer.wrapTextToWidth(cleanedText, previewRenderer.contentWidth, this.settings.fontSize, this.settings.fontFamily);
+        const linesPerPage = Math.floor(previewRenderer.contentHeight / this.settings.lineSpacing);
+        const estimatedPages = Math.ceil(wrappedLines.length / linesPerPage);
         document.getElementById('estimatedPages').textContent = estimatedPages;
     }
 
@@ -141,7 +182,8 @@ class CalligraphyApp {
                 lineSpacing: 35,
                 fontSize: 20,
                 fontColor: '#333333',
-                fontFamily: '衡水体'
+                fontFamily: 'Calibri',
+                autoLineSpacing: true
             };
             this.applySettingsToForm();
             this.updatePreview();
@@ -152,6 +194,7 @@ class CalligraphyApp {
     applySettingsToForm() {
         document.getElementById('lineSpacing').value = this.settings.lineSpacing;
         document.getElementById('fontSize').value = this.settings.fontSize;
+        document.getElementById('autoLineSpacing').checked = this.settings.autoLineSpacing;
 
         document.querySelectorAll('#lineStyleSelector .style-option').forEach(btn => {
             btn.classList.remove('selected');
@@ -183,6 +226,7 @@ class CalligraphyApp {
 
         document.getElementById('lineSpacingValue').textContent = this.settings.lineSpacing;
         document.getElementById('fontSizeValue').textContent = this.settings.fontSize;
+        this.updateLineSpacingControlState();
     }
 
     showToast(message, type = 'info') {
@@ -244,6 +288,25 @@ class PreviewRenderer {
     initCanvas() {
         this.canvas.width = this.width;
         this.canvas.height = this.height;
+    }
+
+    cleanText(rawText) {
+        if (!rawText) return "";
+        let text = rawText;
+
+        // 1. 清理 Markdown 符号造成的断行
+        text = text.replace(/\*\*[\s\uFEFF\xA0]*\n[\s\uFEFF\xA0]*\*\*/g, '');
+
+        // 2. 按空行拆分段落
+        const paragraphs = text.split(/\n\s*\n/);
+
+        // 3. 合并段落内部的垃圾换行
+        const cleanedParagraphs = paragraphs.map(para => {
+            return para.replace(/\s*\n\s*/g, '');
+        });
+
+        // 4. 用双换行连接段落，保留段落间距
+        return cleanedParagraphs.join('\n\n');
     }
 
     setScale(scale) {
@@ -314,15 +377,9 @@ class PreviewRenderer {
                     textToDraw = line;
                 }
                 if (textToDraw) {
-                    // 绘制文本，添加3px的垂直偏移让文字离开横线
-                    const adjustedY = y - 3;
+                    // 绘制文本，根据字体大小动态调整垂直偏移
+                    const adjustedY = y - Math.round(settings.fontSize * 0.12);
                     this.ctx.fillText(textToDraw, this.marginLeft, adjustedY);
-
-                    // 验证边界
-                    const isWithinBounds = this.validateTextBounds(textToDraw, this.marginLeft, this.contentWidth);
-                    if (!isWithinBounds) {
-                        console.warn(`文本超出边界: "${textToDraw}" 在位置 ${this.marginLeft}, 宽度限制: ${this.contentWidth}`);
-                    }
                 }
             }
         }
@@ -346,8 +403,9 @@ class PreviewRenderer {
             pageLines = this.pages[pageIndex] || [];
             totalPages = this.pages.length;
         } else {
-            // 使用相同的换行逻辑
-            const wrappedLines = this.wrapTextToWidth(text, this.contentWidth, settings.fontSize, settings.fontFamily);
+            // 先清洗文本，再进行换行处理
+            const cleanedText = this.cleanText(text);
+            const wrappedLines = this.wrapTextToWidth(cleanedText, this.contentWidth, settings.fontSize, settings.fontFamily);
             const linesPerPage = Math.floor(this.contentHeight / settings.lineSpacing);
             const startIndex = pageIndex * linesPerPage;
             pageLines = wrappedLines.slice(startIndex, startIndex + linesPerPage);
@@ -363,7 +421,7 @@ class PreviewRenderer {
 
     splitTextIntoLines(text, maxCharsPerLine) {
         // 此函数不再使用，改用 wrapTextToWidth
-        return this.wrapTextToWidth(text, this.contentWidth, 20, '衡水体');
+        return this.wrapTextToWidth(text, this.contentWidth, 20, 'Calibri');
     }
 
     updatePreview(text, settings) {
@@ -379,7 +437,9 @@ class PreviewRenderer {
             return;
         }
         this.isRendering = true;
-        this.simpleTextUpdatePreview(text, settings);
+        // 阶段一：清洗文本
+        const cleanedText = this.cleanText(text);
+        this.simpleTextUpdatePreview(cleanedText, settings);
         this.isRendering = false;
         if (this.renderQueue) {
             this.renderQueue = false;
@@ -414,8 +474,9 @@ class PreviewRenderer {
             const line = currentPageLines[i];
             const y = this.marginTop + (i * settings.lineSpacing);
             if (line.trim() !== '') {
-                // 从左边距开始绘制
-                this.ctx.fillText(line, this.marginLeft, y);
+                // 根据字体大小动态调整垂直偏移，让文字完美适配横线
+                const adjustedY = y - Math.round(settings.fontSize * 0.12);
+                this.ctx.fillText(line, this.marginLeft, adjustedY);
             }
         }
         this.pages = pages;
@@ -425,11 +486,12 @@ class PreviewRenderer {
         this.updatePageNavigation();
     }
 
-    wrapTextToWidth(text, maxWidth, fontSize, fontFamily = '衡水体') {
+    wrapTextToWidth(text, maxWidth, fontSize, fontFamily = 'Calibri') {
         // 设置字体确保测量准确
         this.ctx.font = `italic ${fontSize}px ${fontFamily}`;
         const lines = [];
         const paragraphs = text.split('\n');
+        const tolerance = Math.max(fontSize * 0.5, 5); // 动态容差：根据字号计算
 
         for (const paragraph of paragraphs) {
             if (paragraph.trim() === '') {
@@ -437,35 +499,22 @@ class PreviewRenderer {
                 continue;
             }
 
-            // 处理每个段落
-            const words = paragraph.split(' ');
             let currentLine = '';
 
-            for (let i = 0; i < words.length; i++) {
-                const word = words[i];
+            // 逐字符扫描，支持混合语言
+            for (let i = 0; i < paragraph.length; i++) {
+                const char = paragraph[i];
+                const testLine = currentLine + char;
+                const testWidth = this.ctx.measureText(testLine).width;
 
-                if (currentLine === '') {
-                    // 当前行是空的，尝试添加单词
-                    const wordWidth = this.ctx.measureText(word).width;
-                    if (wordWidth <= maxWidth - 5) {  // 添加5px容差
-                        currentLine = word;
-                    } else {
-                        // 单词太长，分割它
-                        const splitWords = this.splitWordByMeasure(word, maxWidth);
-                        lines.push(...splitWords);
-                    }
+                if (testWidth <= maxWidth - tolerance) {
+                    currentLine = testLine;
                 } else {
-                    // 当前行不为空，尝试添加空格和单词
-                    const testLine = currentLine + ' ' + word;
-                    const testWidth = this.ctx.measureText(testLine).width;
-
-                    if (testWidth <= maxWidth - 5) {  // 添加5px容差
-                        currentLine = testLine;
-                    } else {
-                        // 添加当前行，开始新行
+                    // 当前行已满，换行
+                    if (currentLine) {
                         lines.push(currentLine);
-                        currentLine = word;
                     }
+                    currentLine = char;
                 }
             }
 
@@ -478,46 +527,6 @@ class PreviewRenderer {
         return lines;
     }
 
-    splitWordByMeasure(word, maxWidth) {
-        const lines = [];
-        let currentPart = '';
-        const minChunkSize = 2; // 最小分割块大小，避免单字符分割
-
-        for (let i = 0; i < word.length; i++) {
-            const char = word[i];
-            const testPart = currentPart + char;
-            const testWidth = this.ctx.measureText(testPart).width;
-
-            if (testWidth <= maxWidth - 5) {  // 添加5px容差
-                currentPart = testPart;
-            } else {
-                // 只有当当前部分不为空且达到最小大小时才分割
-                if (currentPart !== '') {
-                    lines.push(currentPart);
-                }
-                // 开始新部分
-                currentPart = char;
-            }
-        }
-
-        // 处理最后一部分，如果太短则合并到前一行
-        if (currentPart !== '') {
-            if (lines.length > 0 && currentPart.length < minChunkSize &&
-                this.ctx.measureText(lines[lines.length - 1] + currentPart).width <= maxWidth - 5) {
-                // 合并到前一行
-                lines[lines.length - 1] += currentPart;
-            } else {
-                lines.push(currentPart);
-            }
-        }
-
-        return lines;
-    }
-
-    validateTextBounds(text, x, maxWidth) {
-        const actualWidth = this.ctx.measureText(text).width;
-        return actualWidth <= maxWidth;
-    }
 
     fallbackSimpleTextRender(text, settings) {
         this.clear();
