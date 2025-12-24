@@ -356,35 +356,6 @@ class PreviewRenderer {
         this.ctx.setLineDash([]);
     }
 
-    drawText(lines, settings, pageIndex = 0) {
-        this.ctx.font = `italic ${settings.fontSize}px ${settings.fontFamily}`;
-        this.ctx.fillStyle = settings.fontColor;
-        const startY = this.marginTop;
-        this.drawHorizontalText(lines, settings, startY);
-    }
-
-    drawHorizontalText(lines, settings, startY) {
-        this.ctx.textBaseline = 'alphabetic';
-        for (let i = 0; i < lines.length; i++) {
-            let line = lines[i];
-            const y = startY + (i * settings.lineSpacing);
-            if (y > this.height - this.marginBottom - settings.lineSpacing) break;
-            if (line && line.trim() !== '') {
-                let textToDraw = '';
-                if (typeof line === 'object' && line.text) {
-                    textToDraw = line.text;
-                } else if (typeof line === 'string') {
-                    textToDraw = line;
-                }
-                if (textToDraw) {
-                    // 绘制文本，根据字体大小动态调整垂直偏移
-                    const adjustedY = y - Math.round(settings.fontSize * 0.12);
-                    this.ctx.fillText(textToDraw, this.marginLeft, adjustedY);
-                }
-            }
-        }
-    }
-
     drawPageNumber(pageIndex, totalPages) {
         this.ctx.font = '12px Arial';
         this.ctx.fillStyle = '#666';
@@ -412,16 +383,27 @@ class PreviewRenderer {
             totalPages = Math.ceil(wrappedLines.length / linesPerPage);
         }
 
+        // 直接渲染文字
         if (pageLines.length > 0) {
-            this.drawText(pageLines, settings, pageIndex);
+            this.ctx.font = `italic ${settings.fontSize}px ${settings.fontFamily}`;
+            this.ctx.fillStyle = settings.fontColor;
+            this.ctx.textBaseline = 'bottom';
+
+            for (let i = 0; i < pageLines.length; i++) {
+                const line = pageLines[i];
+                const y = this.marginTop + (i * settings.lineSpacing);
+                if (line && line.trim() !== '') {
+                    const textToDraw = typeof line === 'object' ? line.text : line;
+                    if (textToDraw) {
+                        // 根据字体大小动态调整垂直偏移
+                        const adjustedY = y - Math.round(settings.fontSize * 0.12);
+                        this.ctx.fillText(textToDraw, this.marginLeft, adjustedY);
+                    }
+                }
+            }
         }
         this.drawPageNumber(pageIndex, totalPages);
         return totalPages;
-    }
-
-    splitTextIntoLines(text, maxCharsPerLine) {
-        // 此函数不再使用，改用 wrapTextToWidth
-        return this.wrapTextToWidth(text, this.contentWidth, 20, 'Calibri');
     }
 
     updatePreview(text, settings) {
