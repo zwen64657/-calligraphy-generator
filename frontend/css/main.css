@@ -253,7 +253,6 @@ body {
     height: auto;
 }
 
-
 /* 文本输入容器 */
 .text-input-container {
     flex: 1;
@@ -268,7 +267,6 @@ body {
     font-size: 12px;
     color: #666;
 }
-
 
 /* 提示信息 */
 .toast {
@@ -464,7 +462,7 @@ body {
     }
 }
 
-/* 模态弹窗样式 */
+/* ========== 模态弹窗样式 ========== */
 .intro-modal {
     position: fixed;
     top: 0;
@@ -475,33 +473,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.intro-modal.hidden {
-    display: none;
-}
-
-.intro-modal-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
     background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
 }
 
+/* 弹窗内容容器 */
 .intro-modal-content {
     position: relative;
     background: rgba(255, 255, 255, 0.72);
@@ -512,22 +489,11 @@ body {
     width: 95%;
     padding: 0;
     box-shadow: 0 25px 80px rgba(0, 0, 0, 0.25);
-    animation: modalSlideUp 0.4s ease-out;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-@keyframes modalSlideUp {
-    from {
-        opacity: 0;
-        transform: translateY(50px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
+/* 关闭按钮 */
 .intro-modal-close {
     position: absolute;
     top: 15px;
@@ -552,10 +518,7 @@ body {
     transform: scale(1.1);
 }
 
-.intro-modal-close:active {
-    transform: scale(0.95);
-}
-
+/* 弹窗头部 */
 .intro-modal-header {
     text-align: center;
     padding: 35px 35px 25px;
@@ -597,6 +560,7 @@ body {
     font-size: 16px;
 }
 
+/* 弹窗主体 */
 .intro-modal-body {
     background: transparent;
     padding: 0 35px 25px;
@@ -638,6 +602,7 @@ body {
     flex-shrink: 0;
 }
 
+/* 弹窗底部 */
 .intro-modal-footer {
     background: transparent;
     padding: 10px 35px 30px;
@@ -677,11 +642,23 @@ body {
     box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
 }
 
-.intro-modal-btn:active {
-    transform: translateY(0);
+/* Auto line spacing checkbox */
+#autoLineSpacing {
+    margin-right: 8px;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
 }
 
-@media (max-width: 576px) {
+.form-group label:has(#autoLineSpacing) {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* 响应式适配 */
+@media (max-width: 768px) {
     .intro-modal-content {
         width: 95%;
         max-width: none;
@@ -727,177 +704,4 @@ body {
         padding: 14px 50px;
         font-size: 16px;
     }
-}
-
-/* ========== 主页样式 ========== */
-
-/* 主页容器 */
-.home-container {
-    min-height: 100vh;
-    background: #ffffff;
-    display: flex;
-    flex-direction: column;
-}
-
-/* 主页头部 */
-.home-header {
-    text-align: center;
-    padding: 60px 20px 40px;
-    color: #1a1a1a;
-}
-
-.home-header h1 {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    font-weight: 700;
-    color: #0066cc;
-}
-
-.home-header .subtitle {
-    font-size: 1.2rem;
-    opacity: 0.95;
-    color: #666;
-}
-
-/* 语言卡片网格 */
-.language-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
-    padding: 40px;
-    max-width: 1200px;
-    margin: 0 auto;
-    flex: 1;
-}
-
-/* 语言卡片 */
-.language-card {
-    background: white;
-    border-radius: 20px;
-    padding: 40px 30px;
-    text-align: center;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.language-card:hover:not(.disabled) {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-}
-
-.language-card.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
-
-.card-icon {
-    font-size: 64px;
-    margin-bottom: 20px;
-}
-
-.language-card h3 {
-    font-size: 1.8rem;
-    color: #333;
-    margin-bottom: 10px;
-    font-weight: 600;
-}
-
-.card-desc {
-    color: #666;
-    margin-bottom: 25px;
-    font-size: 1rem;
-}
-
-.card-btn {
-    display: inline-block;
-    padding: 12px 40px;
-    background: #0066cc;
-    color: white;
-    text-decoration: none;
-    border-radius: 25px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-}
-
-.card-btn:hover {
-    background: #0055aa;
-    transform: scale(1.05);
-}
-
-/* 响应式设计 */
-@media (max-width: 768px) {
-    .home-header h1 {
-        font-size: 2.2rem;
-    }
-
-    .home-header .subtitle {
-        font-size: 1rem;
-        color: #666;
-    }
-
-    .language-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 20px;
-    }
-
-    .language-card {
-        padding: 30px 20px;
-    }
-}
-
-/* ========== 返回首页按钮样式 ========== */
-
-.back-btn {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 12px 24px;
-    background: #0066cc;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.3);
-}
-
-.back-btn:hover {
-    background: #0055aa;
-    transform: translateY(-50%) translateX(-3px);
-    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.4);
-}
-
-@media (max-width: 768px) {
-    .back-btn {
-        position: static;
-        display: inline-flex;
-        margin-bottom: 15px;
-        transform: none;
-    }
-
-    .back-btn:hover {
-        transform: translateX(-3px);
-    }
-}
-
-/* Auto line spacing checkbox */
-#autoLineSpacing {
-    margin-right: 8px;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-}
-
-.form-group label:has(#autoLineSpacing) {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
 }

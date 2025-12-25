@@ -3,111 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>外语字帖生成器 - 多语言字帖制作工具</title>
+    <title>外语字帖生成器</title>
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-    <div class="home-container">
-        <!-- 模态弹窗 -->
-        <div class="intro-modal hidden" id="introModal">
-            <div class="intro-modal-overlay" id="modalOverlay"></div>
-            <div class="intro-modal-content">
-                <button class="intro-modal-close" id="closeModalBtn" aria-label="关闭">
-                    <span>✕</span>
+    <!-- 欢迎弹窗 -->
+    <div class="intro-modal" id="introModal">
+        <div class="intro-modal-content">
+            <button class="intro-modal-close" id="closeModalBtn" aria-label="关闭">
+                <span>✕</span>
+            </button>
+            <div class="intro-modal-header">
+                <div class="intro-modal-icon">📝</div>
+                <h2>欢迎使用外语字帖生成器</h2>
+                <div class="intro-badge-highlight">
+                    <span class="badge-icon">✨</span>
+                    AI驱动：智谱GLM
+                </div>
+            </div>
+            <div class="intro-modal-body">
+                <p class="intro-description">
+                    输入文本内容，即可生成专业的可打印字帖PDF。
+                </p>
+                <ul class="intro-features">
+                    <li><span class="feature-icon">✓</span> 支持多种语言字帖生成</li>
+                    <li><span class="feature-icon">✓</span> 自由设置线条样式和颜色</li>
+                    <li><span class="feature-icon">✓</span> 调整字体大小和间距</li>
+                    <li><span class="feature-icon">✓</span> 实时预览效果</li>
+                    <li><span class="feature-icon">✓</span> 一键导出高清PDF</li>
+                </ul>
+            </div>
+            <div class="intro-modal-footer">
+                <button class="intro-modal-btn" id="gotItBtn">
+                    我知道了
                 </button>
-                <div class="intro-modal-header">
-                    <div class="intro-modal-icon">📝</div>
-                    <h2>欢迎使用外语字帖生成器</h2>
-                    <div class="intro-badge-highlight">
-                        <span class="badge-icon">✨</span>
-                        AI驱动：智谱GLM
-                    </div>
-                </div>
-                <div class="intro-modal-body">
-                    <p class="intro-description">
-                        选择您想要练习的语言，输入文本内容，即可生成专业的可打印字帖PDF。
-                    </p>
-                    <ul class="intro-features">
-                        <li><span class="feature-icon">✓</span> 支持多种语言字帖生成</li>
-                        <li><span class="feature-icon">✓</span> 自由设置线条样式和颜色</li>
-                        <li><span class="feature-icon">✓</span> 调整字体大小和间距</li>
-                        <li><span class="feature-icon">✓</span> 实时预览效果</li>
-                        <li><span class="feature-icon">✓</span> 一键导出高清PDF</li>
-                    </ul>
-                </div>
-                <div class="intro-modal-footer">
-                    <button class="intro-modal-btn" id="gotItBtn">
-                        我知道了
-                    </button>
-                    <p class="intro-contact">联系作者：1877303149@qq.com</p>
-                </div>
+                <p class="intro-contact">联系作者：1877303149@qq.com</p>
             </div>
         </div>
-
-        <!-- 页面头部 -->
-        <header class="home-header">
-            <h1>外语字帖生成器</h1>
-        </header>
-
-        <!-- 语言卡片网格 -->
-        <main class="language-grid">
-            <!-- 世界语卡片 -->
-            <div class="language-card" data-lang="esperanto">
-                <div class="card-icon">🌍</div>
-                <h3>世界语</h3>
-                <p class="card-desc">Esperanto - 国际辅助语言</p>
-                <a href="esperanto.html" class="card-btn">进入</a>
-            </div>
-
-            <!-- 预留语言卡片 -->
-            <div class="language-card disabled">
-                <div class="card-icon">🔒</div>
-                <h3>敬请期待</h3>
-                <p class="card-desc">更多语言即将上线</p>
-            </div>
-
-            <div class="language-card disabled">
-                <div class="card-icon">🔒</div>
-                <h3>敬请期待</h3>
-                <p class="card-desc">更多语言即将上线</p>
-            </div>
-
-            <div class="language-card disabled">
-                <div class="card-icon">🔒</div>
-                <h3>敬请期待</h3>
-                <p class="card-desc">更多语言即将上线</p>
-            </div>
-        </main>
     </div>
 
+    <div class="app-container">
+        <header class="app-header">
+        </header>
+
+        <main class="app-main">
+            <!-- 左侧设置区 -->
+            <section class="settings-panel">
+                <h2>字帖设置</h2>
+
+                <!-- 线条设置 -->
+                <div class="setting-group">
+                    <h3>线条设置</h3>
+                    <div class="form-group">
+                        <label>线条样式</label>
+                        <div class="style-selector" id="lineStyleSelector">
+                            <button type="button" class="style-option selected" data-style="solid">
+                                <div class="line-preview solid-line"></div>
+                                <span>直线</span>
+                            </button>
+                            <button type="button" class="style-option" data-style="dashed">
+                                <div class="line-preview dashed-line"></div>
+                                <span>虚线</span>
+                            </button>
+                            <button type="button" class="style-option" data-style="dotted">
+                                <div class="line-preview dotted-line"></div>
+                                <span>点线</span>
+                            </button>
+                            <button type="button" class="style-option" data-style="dashdot">
+                                <div class="line-preview dashdot-line"></div>
+                                <span>点划线</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>线条颜色</label>
+                        <div class="color-selector" id="lineColorSelector">
+                            <button type="button" class="color-circle selected" data-color="#1a1a1a" style="background-color: #1a1a1a"></button>
+                            <button type="button" class="color-circle" data-color="#333333" style="background-color: #333333"></button>
+                            <button type="button" class="color-circle" data-color="#4d4d4d" style="background-color: #4d4d4d"></button>
+                            <button type="button" class="color-circle" data-color="#666666" style="background-color: #666666"></button>
+                            <button type="button" class="color-circle" data-color="#808080" style="background-color: #808080"></button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="lineSpacing">线条间距: <span id="lineSpacingValue">35</span>px</label>
+                        <input type="range" id="lineSpacing" min="20" max="50" value="35" class="form-control-range">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="autoLineSpacing">
+                            <input type="checkbox" id="autoLineSpacing" checked>
+                            自动调整行间距 (随字体大小)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 字体设置 -->
+                <div class="setting-group">
+                    <h3>字体设置</h3>
+                    <div class="form-group">
+                        <label for="fontSize">字体大小: <span id="fontSizeValue">20</span>px</label>
+                        <input type="range" id="fontSize" min="20" max="40" value="20" class="form-control-range">
+                    </div>
+
+                    <div class="form-group">
+                        <label>字体颜色</label>
+                        <div class="color-selector" id="fontColorSelector">
+                            <button type="button" class="color-circle selected" data-color="#000000" style="background-color: #000000"></button>
+                            <button type="button" class="color-circle" data-color="#333333" style="background-color: #333333"></button>
+                            <button type="button" class="color-circle" data-color="#666666" style="background-color: #666666"></button>
+                            <button type="button" class="color-circle" data-color="#999999" style="background-color: #999999"></button>
+                            <button type="button" class="color-circle" data-color="#0066cc" style="background-color: #0066cc"></button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>字体</label>
+                        <div class="font-selector" id="fontFamilySelector">
+                            <button type="button" class="font-circle selected" data-font="Calibri" style="font-family: Calibri, sans-serif">Calibri</button>
+                        </div>
+                    </div>
+
+                <!-- 操作按钮 -->
+                <div class="action-buttons">
+                    <button id="exportPDF" class="btn btn-primary">
+                        <span class="icon">📄</span>
+                        导出PDF
+                    </button>
+                    <button id="resetSettings" class="btn btn-secondary">
+                        <span class="icon">🔄</span>
+                        重置设置
+                    </button>
+                </div>
+            </section>
+
+            <!-- 中间预览区 -->
+            <section class="preview-panel">
+                <h2>字帖预览</h2>
+
+                <!-- 页面导航 -->
+                <div class="page-navigation">
+                    <button id="prevPage" class="btn btn-nav" disabled>
+                        <span class="icon">◀</span>
+                        上一页
+                    </button>
+                    <span class="page-info">
+                        第 <span id="currentPage">1</span> 页 / 共 <span id="totalPages">1</span> 页
+                    </span>
+                    <button id="nextPage" class="btn btn-nav" disabled>
+                        下一页
+                        <span class="icon">▶</span>
+                    </button>
+                </div>
+
+                <!-- Canvas预览区 -->
+                <div class="canvas-container">
+                    <canvas id="previewCanvas" width="794" height="1123"></canvas>
+                </div>
+            </section>
+
+            <!-- 右侧文本输入区 -->
+            <section class="input-panel">
+                <h2>文本输入</h2>
+
+                <!-- 文本输入区 -->
+                <div class="text-input-container">
+                    <textarea
+                        id="textInput"
+                        class="form-textarea"
+                        placeholder="请输入文本内容..."
+                    ></textarea>
+
+                    <div class="text-info">
+                        <span>字符数: <span id="charCount">0</span></span>
+                        <span>预计页数: <span id="estimatedPages">0</span></span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 提示信息 -->
+        <div id="toast" class="toast hidden">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <!-- 第三方库 -->
+    <script src="libs/jspdf/jspdf.umd.min.js"></script>
+
+    <!-- 合并后的JS文件 -->
+    <script src="js/app-compact.js"></script>
+
+    <!-- 欢迎弹窗脚本 -->
     <script>
-        // 模态弹窗控制
         document.addEventListener('DOMContentLoaded', () => {
             const modal = document.getElementById('introModal');
             const closeBtn = document.getElementById('closeModalBtn');
             const gotItBtn = document.getElementById('gotItBtn');
-            const overlay = document.getElementById('modalOverlay');
 
             const closeModal = () => {
-                modal.classList.add('hidden');
+                modal.style.display = 'none';
             };
-
-            // 检查 URL 参数判断是否从世界语页面返回
-            const urlParams = new URLSearchParams(window.location.search);
-            const isFromEsperanto = urlParams.get('from') === 'esperanto';
-
-            // 如果是从世界语页返回，清理 URL
-            if (isFromEsperanto) {
-                window.history.replaceState({}, '', 'index.html');
-            } else {
-                // 首次打开或刷新页面，显示弹窗
-                modal.classList.remove('hidden');
-            }
 
             closeBtn.addEventListener('click', closeModal);
             gotItBtn.addEventListener('click', closeModal);
-            overlay.addEventListener('click', closeModal);
         });
     </script>
 </body>
